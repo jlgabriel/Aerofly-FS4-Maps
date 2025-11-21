@@ -3,109 +3,109 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 
-Un rastreador de aeronaves en tiempo real de código abierto para el simulador de vuelo **Aerofly FS4**. Visualiza la posición de tu aeronave en un mapa interactivo con información detallada de vuelo.
+An open-source real-time aircraft tracker for **Aerofly FS4** flight simulator. Visualize your aircraft position on an interactive map with detailed flight information.
 
 ![Aircraft Tracker Demo](https://via.placeholder.com/800x400?text=Aircraft+Tracker+Demo)
 
-## 🚀 Características
+## 🚀 Features
 
-- **Recepción de datos UDP** desde Aerofly FS4 en tiempo real
-- **Mapa interactivo** que muestra la posición de la aeronave
-- **Información de vuelo en vivo**: latitud, longitud, altitud, velocidad sobre el suelo, rumbo, pitch y roll
-- **Múltiples estilos de mapas**: OpenStreetMap, Google Maps (Normal, Satélite, Terreno, Híbrido), ESRI, CartoDB y más
-- **Actualización en tiempo real** de la posición y orientación de la aeronave
-- **Interfaz gráfica amigable** con Tkinter
-- **Estado de conexión** visible para saber si está recibiendo datos del simulador
-- **Icono de aeronave rotativo** que refleja el rumbo real del avión
+- **Real-time UDP data reception** from Aerofly FS4
+- **Interactive map** displaying aircraft position
+- **Live flight information**: latitude, longitude, altitude, ground speed, heading, pitch, and roll
+- **Multiple map styles**: OpenStreetMap, Google Maps (Normal, Satellite, Terrain, Hybrid), ESRI, CartoDB, and more
+- **Real-time updates** of aircraft position and orientation
+- **User-friendly GUI** built with Tkinter
+- **Connection status indicator** to know when receiving simulator data
+- **Rotating aircraft icon** reflecting actual heading
 
-## 📋 Requisitos Previos
+## 📋 Prerequisites
 
-- Python 3.7 o superior
+- Python 3.7 or higher
 - Aerofly FS4 Flight Simulator
-- Sistema operativo: Windows, Linux o macOS
+- Operating System: Windows, Linux, or macOS
 
-## 🔧 Instalación
+## 🔧 Installation
 
-1. **Clona el repositorio**:
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/jlgabriel/Aerofly-FS4-Maps.git
    cd Aerofly-FS4-Maps
    ```
 
-2. **Instala las dependencias**:
+2. **Install dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. **Asegúrate de tener el archivo de ícono de aeronave**:
-   - El proyecto requiere un archivo `aircraft_icon.png` en el directorio raíz
-   - Puedes crear o descargar un ícono de aeronave (32x32 píxeles recomendado)
+3. **Ensure you have the aircraft icon file**:
+   - The project requires an `aircraft_icon.png` file in the root directory
+   - You can create or download an aircraft icon (32x32 pixels recommended)
 
-## 🎮 Configuración de Aerofly FS4
+## 🎮 Aerofly FS4 Configuration
 
-Para que este tracker funcione, debes habilitar la transmisión UDP en Aerofly FS4:
+For this tracker to work, you must enable UDP broadcasting in Aerofly FS4:
 
-1. Abre Aerofly FS4
-2. Ve a **Settings** (Configuración)
-3. Busca la opción de **UDP Output** o **Data Output**
-4. Habilita el envío de datos GPS (XGPS) y actitud (XATT)
-5. Configura el puerto UDP a **49002** (o modifica la constante `UDP_PORT` en el código)
-6. Asegúrate de que los datos se envíen a `localhost` o `broadcast`
+1. Open Aerofly FS4
+2. Go to **Settings**
+3. Look for **UDP Output** or **Data Output** option
+4. Enable GPS data (XGPS) and attitude data (XATT) transmission
+5. Configure UDP port to **49002** (or modify the `UDP_PORT` constant in the code)
+6. Ensure data is sent to `localhost` or `broadcast`
 
-## 🚁 Uso
+## 🚁 Usage
 
-1. **Inicia Aerofly FS4** y carga un vuelo
+1. **Start Aerofly FS4** and load a flight
 
-2. **Ejecuta el tracker**:
+2. **Run the tracker**:
    ```bash
    python aerofly_fs4_maps.py
    ```
 
-3. **Interacción con la interfaz**:
-   - El mapa mostrará automáticamente la posición de tu aeronave cuando detecte datos
-   - Selecciona diferentes estilos de mapa desde el panel lateral
-   - El panel de información muestra los datos de vuelo en tiempo real
-   - El indicador de estado muestra "Connected" (verde) cuando recibe datos
+3. **Interface interaction**:
+   - The map will automatically display your aircraft position when data is detected
+   - Select different map styles from the sidebar
+   - The information panel shows real-time flight data
+   - The status indicator shows "Connected" (green) when receiving data
 
-4. **Cierra la aplicación**:
-   - Haz clic en el botón "Close Map"
-   - O cierra la ventana normalmente
+4. **Close the application**:
+   - Click the "Close Map" button
+   - Or close the window normally
 
-## 📊 Datos Visualizados
+## 📊 Displayed Data
 
-El tracker muestra la siguiente información:
+The tracker displays the following information:
 
-| Parámetro | Unidad | Descripción |
-|-----------|--------|-------------|
-| Latitude | Grados | Latitud actual |
-| Longitude | Grados | Longitud actual |
-| Altitude | Pies (ft) | Altitud sobre el nivel del mar |
-| Ground Speed | Nudos (kts) | Velocidad respecto al suelo |
-| True Heading | Grados | Rumbo verdadero |
-| Pitch | Grados | Ángulo de cabeceo |
-| Roll | Grados | Ángulo de alabeo |
+| Parameter | Unit | Description |
+|-----------|------|-------------|
+| Latitude | Degrees | Current latitude |
+| Longitude | Degrees | Current longitude |
+| Altitude | Feet (ft) | Altitude above sea level |
+| Ground Speed | Knots (kts) | Speed relative to ground |
+| True Heading | Degrees | True heading |
+| Pitch | Degrees | Pitch angle |
+| Roll | Degrees | Roll angle |
 
-## 🗺️ Mapas Disponibles
+## 🗺️ Available Maps
 
-El tracker incluye 13 estilos de mapas diferentes:
+The tracker includes 13 different map styles:
 
-- **OpenStreetMap** (estándar, DE, FR)
-- **OpenTopoMap** (topográfico)
-- **Google Maps** (Normal, Satélite, Terreno, Híbrido)
+- **OpenStreetMap** (standard, DE, FR)
+- **OpenTopoMap** (topographic)
+- **Google Maps** (Normal, Satellite, Terrain, Hybrid)
 - **CartoDB** (Dark Matter, Positron)
 - **ESRI** (World Imagery, Street Map, Topo Map)
 
-## 🛠️ Estructura del Código
+## 🛠️ Code Structure
 
 ```
 aerofly_fs4_maps.py
-├── UDPReceiver          # Clase para recibir y parsear datos UDP
+├── UDPReceiver          # Class for receiving and parsing UDP data
 │   ├── start_receiving()
 │   ├── _receive_data()
 │   ├── _parse_gps_data()
 │   └── _parse_attitude_data()
 │
-└── AircraftTrackerApp   # Clase principal de la aplicación GUI
+└── AircraftTrackerApp   # Main GUI application class
     ├── setup_ui()
     ├── setup_aircraft_marker()
     ├── update_aircraft_position()
@@ -113,59 +113,59 @@ aerofly_fs4_maps.py
     └── update_info_display()
 ```
 
-## 🔧 Configuración Avanzada
+## 🔧 Advanced Configuration
 
-Puedes modificar las siguientes constantes en `aerofly_fs4_maps.py`:
+You can modify the following constants in `aerofly_fs4_maps.py`:
 
 ```python
-UDP_PORT = 49002              # Puerto UDP para recibir datos
-WINDOW_SIZE = "1000x600"      # Tamaño de la ventana
-MAP_SIZE = (800, 600)         # Tamaño del widget de mapa
-UPDATE_INTERVAL = 100         # Intervalo de actualización (ms)
-RECEIVE_TIMEOUT = 5.0         # Timeout de conexión (segundos)
+UDP_PORT = 49002              # UDP port for receiving data
+WINDOW_SIZE = "1000x600"      # Window size
+MAP_SIZE = (800, 600)         # Map widget size
+UPDATE_INTERVAL = 100         # Update interval (ms)
+RECEIVE_TIMEOUT = 5.0         # Connection timeout (seconds)
 ```
 
-## 🐛 Resolución de Problemas
+## 🐛 Troubleshooting
 
-### El tracker no muestra "Connected"
-- Verifica que Aerofly FS4 esté enviando datos UDP en el puerto 49002
-- Asegúrate de que el firewall no esté bloqueando el puerto
-- Comprueba que la configuración de UDP en Aerofly FS4 esté habilitada
+### Tracker doesn't show "Connected"
+- Verify that Aerofly FS4 is sending UDP data on port 49002
+- Ensure firewall isn't blocking the port
+- Check that UDP configuration in Aerofly FS4 is enabled
 
 ### Error: "aircraft_icon.png not found"
-- Crea o descarga un archivo de ícono de aeronave (PNG)
-- Colócalo en el directorio raíz del proyecto con el nombre `aircraft_icon.png`
+- Create or download an aircraft icon file (PNG)
+- Place it in the project root directory with the name `aircraft_icon.png`
 
-### El mapa no se carga
-- Verifica tu conexión a Internet (los tiles del mapa se descargan online)
-- Algunos mapas pueden tener limitaciones de uso, prueba con otro estilo
+### Map doesn't load
+- Verify your internet connection (map tiles are downloaded online)
+- Some maps may have usage limitations, try a different style
 
-## 📝 Versión
+## 📝 Version
 
-**Versión 25**: Agregado indicador de estado de conexión y manejo mejorado de errores para la recepción de datos UDP.
+**Version 25**: Added connection status indicator and improved error handling for UDP data reception.
 
-## 🤝 Contribuciones
+## 🤝 Contributing
 
-Las contribuciones son bienvenidas. Por favor, lee [CONTRIBUTING.md](CONTRIBUTING.md) para más detalles sobre nuestro código de conducta y el proceso para enviar pull requests.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-## 📄 Licencia
+## 📄 License
 
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👨‍💻 Autor
+## 👨‍💻 Author
 
 **Juan Luis Gabriel** - [@jlgabriel](https://github.com/jlgabriel)
 
-## 🙏 Agradecimientos
+## 🙏 Acknowledgments
 
-- [IPACS](https://www.aerofly.com/) por crear Aerofly FS4 Flight Simulator
-- [TkinterMapView](https://github.com/TomSchimansky/TkinterMapView) por el widget de mapas
-- Comunidad de OpenStreetMap y otros proveedores de tiles
+- [IPACS](https://www.aerofly.com/) for creating Aerofly FS4 Flight Simulator
+- [TkinterMapView](https://github.com/TomSchimansky/TkinterMapView) for the map widget
+- OpenStreetMap community and other tile providers
 
 ## ⚠️ Disclaimer
 
-Este software no está afiliado, asociado, autorizado, respaldado por, ni en modo alguno oficialmente conectado con IPACS GbR, o cualquiera de sus filiales o afiliados. El nombre oficial "Aerofly FS4" así como los nombres, marcas, emblemas e imágenes relacionadas son marcas registradas de sus respectivos propietarios.
+This software is not affiliated with, associated with, authorized by, endorsed by, or in any way officially connected with IPACS GbR, or any of its subsidiaries or affiliates. The official "Aerofly FS4" name as well as related names, marks, emblems, and images are registered trademarks of their respective owners.
 
 ---
 
-**¿Te gusta este proyecto?** Dale una ⭐ en GitHub y compártelo con la comunidad de simulación de vuelo.
+**Like this project?** Give it a ⭐ on GitHub and share it with the flight simulation community!
