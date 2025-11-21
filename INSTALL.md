@@ -184,45 +184,23 @@ python3 aerofly_fs4_maps.py
 
 ---
 
-## Creating the Aircraft Icon
+## Aircraft Icon
 
-The application requires an `aircraft_icon.png` file (32x32 pixels recommended).
+The application uses an `aircraft_icon.png` file (32x32 pixels) to display the aircraft on the map.
 
-### Option 1: Create Your Own
+### Icon Included
 
-Use any image editor (GIMP, Photoshop, Paint.NET, etc.) to create a simple airplane icon.
+**Good news!** The icon is already included in the repository when you clone it. You don't need to create or download anything - it's ready to use out of the box.
 
-### Option 2: Download from Internet
+### Custom Icon (Optional)
 
-Search for "airplane icon png" and download a suitable image.
+If you want to use your own custom aircraft icon:
 
-### Option 3: Simple Text-Based Icon
+1. **Create or download** a PNG image (32x32 pixels recommended)
+2. **Replace** the existing `aircraft_icon.png` file in the project root directory
+3. **Restart** the application to see your custom icon
 
-Create a simple icon using Python:
-
-```python
-from PIL import Image, ImageDraw
-
-img = Image.new('RGBA', (32, 32), (255, 255, 255, 0))
-draw = ImageDraw.Draw(img)
-
-# Draw a simple airplane shape
-draw.polygon([(16, 2), (18, 16), (30, 14), (18, 18), (18, 28),
-              (20, 30), (16, 28), (12, 30), (14, 28), (14, 18),
-              (2, 14), (14, 16)], fill='blue', outline='black')
-
-img.save('aircraft_icon.png')
-print("Icon created successfully!")
-```
-
-Save this as `create_icon.py` and run:
-```bash
-python create_icon.py
-```
-
-### Place the Icon
-
-Ensure `aircraft_icon.png` is in the same directory as `aerofly_fs4_maps.py`.
+You can use any image editor (GIMP, Photoshop, Paint.NET, etc.) to create your own icon, or search online for "airplane icon png".
 
 ---
 
@@ -282,7 +260,11 @@ pip install -r requirements.txt
 
 ### "aircraft_icon.png not found"
 
-Create the icon using one of the methods in [Creating the Aircraft Icon](#creating-the-aircraft-icon)
+The icon should be included automatically when you clone the repository. If you encounter this error:
+
+1. Verify your git clone was complete: `git status`
+2. Check if the file exists: `ls -l aircraft_icon.png`
+3. If missing, re-clone the repository or download the icon directly from the GitHub repo
 
 ### Application won't connect to Aerofly FS4
 
