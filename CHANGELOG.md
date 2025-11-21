@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Version 26] - 2024
+
+### Added
+- **Flight Path Recording**: Visual trail on map showing complete flight route
+  - Cyan blue path line with automatic point filtering
+  - Clear path button to reset trail
+- **Flight Statistics Panel**: Comprehensive flight data tracking
+  - Total flight time (HH:MM:SS format)
+  - Distance traveled in nautical miles
+  - Average and maximum speed tracking
+  - Maximum altitude reached
+  - Flight starting position coordinates
+  - Path points counter
+- **Auto-Center Toggle**: Map exploration control
+  - Checkbox to enable/disable automatic centering
+  - Manual re-center button to snap back to aircraft
+  - Allows free map exploration while maintaining tracking
+- **Enhanced UI Layout**: Reorganized control panel
+  - Map Controls section with all new buttons
+  - Improved visual hierarchy with labeled frames
+  - Better color coding for different button functions
+  - Larger window size (1200x700) for better visibility
+
+### Changed
+- Increased window size to accommodate new features
+- Improved control panel organization with labeled frames
+- Updated Aircraft Data and Statistics displays with better formatting
+- Enhanced connection status indicator with bullet point
+- Improved initial map zoom level (12 instead of 10)
+
+### Technical Improvements
+- Implemented Haversine formula for accurate distance calculations
+- Added point filtering to prevent path clutter (minimum 50m between points)
+- Optimized statistics calculations with rolling averages
+- Added proper datetime handling for flight time tracking
+- Improved memory management for speed samples (limited to last 100)
+
 ## [Version 25] - 2024
 
 ### Added

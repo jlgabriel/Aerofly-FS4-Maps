@@ -9,6 +9,7 @@ An open-source real-time aircraft tracker for **Aerofly FS4** flight simulator. 
 
 ## 🚀 Features
 
+### Core Features
 - **Real-time UDP data reception** from Aerofly FS4
 - **Interactive map** displaying aircraft position
 - **Live flight information**: latitude, longitude, altitude, ground speed, heading, pitch, and roll
@@ -17,6 +18,14 @@ An open-source real-time aircraft tracker for **Aerofly FS4** flight simulator. 
 - **User-friendly GUI** built with Tkinter
 - **Connection status indicator** to know when receiving simulator data
 - **Rotating aircraft icon** reflecting actual heading
+
+### New in Version 26 ✨
+- **Flight Path Recording**: Visual trail showing your complete flight route on the map
+- **Flight Statistics Panel**: Track distance traveled, flight time, average/max speed, max altitude, and more
+- **Auto-Center Toggle**: Disable auto-centering to freely explore the map while tracking continues
+- **Manual Re-center**: Quick button to snap back to aircraft position
+- **Clear Path**: Reset flight trail with one click
+- **Reset Statistics**: Start a fresh statistics session anytime
 
 ## 📋 Prerequisites
 
@@ -67,13 +76,21 @@ For this tracker to work, you must enable UDP broadcasting in Aerofly FS4:
    - The information panel shows real-time flight data
    - The status indicator shows "Connected" (green) when receiving data
 
-4. **Close the application**:
-   - Click the "Close Map" button
+4. **Using the new features**:
+   - **Flight Path**: Automatically records your flight trail in cyan blue on the map
+   - **Auto-Center**: Uncheck to explore the map freely; use "Re-Center" button to return to aircraft
+   - **Statistics**: View real-time flight stats including time, distance, speeds, and altitude
+   - **Clear Path**: Click to remove the flight trail and start fresh
+   - **Reset Stats**: Click to reset all statistics (useful for starting a new flight session)
+
+5. **Close the application**:
+   - Click the "Close" button
    - Or close the window normally
 
 ## 📊 Displayed Data
 
-The tracker displays the following information:
+### Aircraft Data Panel
+The tracker displays the following real-time information:
 
 | Parameter | Unit | Description |
 |-----------|------|-------------|
@@ -84,6 +101,19 @@ The tracker displays the following information:
 | True Heading | Degrees | True heading |
 | Pitch | Degrees | Pitch angle |
 | Roll | Degrees | Roll angle |
+
+### Flight Statistics Panel
+Cumulative flight statistics tracked throughout your session:
+
+| Statistic | Unit | Description |
+|-----------|------|-------------|
+| Time | HH:MM:SS | Total flight time (starts when moving) |
+| Distance | Nautical Miles | Total distance traveled |
+| Avg Speed | Knots | Average speed during flight |
+| Max Speed | Knots | Maximum speed reached |
+| Max Alt | Feet | Maximum altitude reached |
+| Start Position | Lat/Lon | Flight starting coordinates |
+| Points | Count | Number of path points recorded |
 
 ## 🗺️ Available Maps
 
@@ -141,6 +171,8 @@ RECEIVE_TIMEOUT = 5.0         # Connection timeout (seconds)
 - Some maps may have usage limitations, try a different style
 
 ## 📝 Version
+
+**Version 26** (Current): Added flight path recording, flight statistics panel, and auto-center toggle for enhanced flight tracking and analysis.
 
 **Version 25**: Added connection status indicator and improved error handling for UDP data reception.
 
