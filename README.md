@@ -46,9 +46,10 @@ An open-source real-time aircraft tracker for **Aerofly FS4** flight simulator. 
    pip install -r requirements.txt
    ```
 
-3. **Ensure you have the aircraft icon file**:
-   - The project requires an `aircraft_icon.png` file in the root directory
-   - You can create or download an aircraft icon (32x32 pixels recommended)
+3. **Aircraft icon** (included):
+   - The repository includes an `aircraft_icon.png` file for the aircraft marker
+   - The icon is already in the root directory and ready to use
+   - If needed, you can replace it with your own custom icon (32x32 pixels recommended)
 
 ## 🎮 Aerofly FS4 Configuration
 
@@ -163,8 +164,9 @@ RECEIVE_TIMEOUT = 5.0         # Connection timeout (seconds)
 - Check that UDP configuration in Aerofly FS4 is enabled
 
 ### Error: "aircraft_icon.png not found"
-- Create or download an aircraft icon file (PNG)
-- Place it in the project root directory with the name `aircraft_icon.png`
+- The icon file should be included when you clone the repository
+- If missing, verify your git clone was successful: `git status`
+- You can re-download the repository or get the icon from the GitHub repo directly
 
 ### Map doesn't load
 - Verify your internet connection (map tiles are downloaded online)
