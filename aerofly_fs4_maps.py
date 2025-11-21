@@ -14,8 +14,11 @@ and enhance the overall simulation experience. Key features include:
 - Allows users to switch between different map styles
 - Updates the aircraft's position and orientation in real-time
 - Provides a user-friendly GUI for easy interaction
+- Flight path recording with visual trail
+- Flight statistics panel with key metrics
+- Auto-center toggle for map exploration
 
-Version 25: Added a connection status label and improved error handling for UDP data reception.
+Version 26: Added flight path recording, statistics panel, and auto-center toggle.
 
 """
 
@@ -28,16 +31,21 @@ from tkinter import font as tkfont
 from PIL import Image, ImageTk
 from typing import Optional, Dict, Any, Tuple, List
 from dataclasses import dataclass
+from datetime import datetime
 import time
+import math
 
 # Constants
 UDP_PORT = 49002
-WINDOW_SIZE = "1000x600"
-MAP_SIZE = (800, 600)
-CONTROL_FRAME_WIDTH = 200
-INFO_DISPLAY_SIZE = (24, 9)
+WINDOW_SIZE = "1200x700"
+MAP_SIZE = (900, 700)
+CONTROL_FRAME_WIDTH = 300
+INFO_DISPLAY_SIZE = (30, 7)
+STATS_DISPLAY_SIZE = (30, 8)
 UPDATE_INTERVAL = 100  # milliseconds
 RECEIVE_TIMEOUT = 5.0  # seconds
+PATH_COLOR = "#00BFFF"  # Deep Sky Blue for flight path
+PATH_MIN_DISTANCE = 0.0005  # Minimum distance to add new point (degrees, ~50m)
 
 @dataclass
 class GPSData:
@@ -137,8 +145,25 @@ class AircraftTrackerApp:
     """
     def __init__(self, master: tk.Tk):
         self.master = master
-        self.master.title("Aircraft Tracker")
+        self.master.title("Aircraft Tracker - Aerofly FS4")
         self.master.geometry(WINDOW_SIZE)
+
+        # Flight path recording
+        self.flight_path_points: List[Tuple[float, float]] = []
+        self.path_line = None
+
+        # Flight statistics
+        self.flight_start_time: Optional[datetime] = None
+        self.flight_start_position: Optional[Tuple[float, float]] = None
+        self.total_distance: float = 0.0  # in nautical miles
+        self.max_altitude: float = 0.0  # in feet
+        self.max_speed: float = 0.0  # in knots
+        self.speed_samples: List[float] = []
+        self.last_position: Optional[Tuple[float, float]] = None
+
+        # Auto-center control
+        self.auto_center_enabled = tk.BooleanVar(value=True)
+
         self.setup_ui()
         self.udp_receiver = UDPReceiver()
         self.udp_receiver.start_receiving()
@@ -158,29 +183,76 @@ class AircraftTrackerApp:
         self.control_frame = tk.Frame(self.main_frame, width=CONTROL_FRAME_WIDTH)
         self.control_frame.pack(side="right", fill="y")
 
-        self.setup_map_selection()
-        self.setup_info_display()
-
-        # Add a connection status label
-        self.connection_status = tk.Label(self.control_frame, text="Disconnected", fg="red")
+        # Connection status at the top
+        self.connection_status = tk.Label(self.control_frame, text="Disconnected", fg="red", font=("Arial", 10, "bold"))
         self.connection_status.pack(pady=5)
 
+        self.setup_map_controls()
+        self.setup_map_selection()
+        self.setup_info_display()
+        self.setup_stats_display()
+
         # Add a close button
-        self.close_button = tk.Button(self.control_frame, text="Close Map", command=self.close_application)
+        self.close_button = tk.Button(self.control_frame, text="Close", command=self.close_application, bg="#ff6b6b", fg="white")
         self.close_button.pack(side="bottom", pady=10)
 
         # Set up the window close protocol
         self.master.protocol("WM_DELETE_WINDOW", self.close_application)
 
+    def setup_map_controls(self):
+        """Set up map control buttons (auto-center, clear path, etc)."""
+        controls_frame = tk.LabelFrame(self.control_frame, text="Map Controls", padx=5, pady=5)
+        controls_frame.pack(pady=10, padx=5, fill="x")
+
+        # Auto-center checkbox
+        auto_center_check = tk.Checkbutton(
+            controls_frame,
+            text="Auto-Center",
+            variable=self.auto_center_enabled,
+            font=("Arial", 9)
+        )
+        auto_center_check.pack(anchor="w", pady=2)
+
+        # Re-center button
+        recenter_btn = tk.Button(
+            controls_frame,
+            text="⊚ Re-Center",
+            command=self.recenter_map,
+            bg="#4CAF50",
+            fg="white",
+            font=("Arial", 9)
+        )
+        recenter_btn.pack(fill="x", pady=2)
+
+        # Clear path button
+        clear_path_btn = tk.Button(
+            controls_frame,
+            text="🗑 Clear Path",
+            command=self.clear_flight_path,
+            bg="#FF9800",
+            fg="white",
+            font=("Arial", 9)
+        )
+        clear_path_btn.pack(fill="x", pady=2)
+
+        # Reset stats button
+        reset_stats_btn = tk.Button(
+            controls_frame,
+            text="↻ Reset Stats",
+            command=self.reset_statistics,
+            bg="#2196F3",
+            fg="white",
+            font=("Arial", 9)
+        )
+        reset_stats_btn.pack(fill="x", pady=2)
+
     def setup_map_selection(self):
         """Set up the map selection listbox."""
-        tk.Label(self.control_frame, text="Select Map:").pack(pady=(10, 5))
+        map_frame = tk.LabelFrame(self.control_frame, text="Map Style", padx=5, pady=5)
+        map_frame.pack(pady=5, padx=5, fill="both", expand=True)
 
-        listbox_frame = tk.Frame(self.control_frame)
-        listbox_frame.pack(padx=0, pady=5)
-
-        self.map_listbox = tk.Listbox(listbox_frame, width=24, height=13)
-        self.map_listbox.pack(side="left")
+        self.map_listbox = tk.Listbox(map_frame, width=32, height=8, font=("Arial", 8))
+        self.map_listbox.pack(fill="both", expand=True)
 
         for option, _ in self.get_map_options():
             self.map_listbox.insert(tk.END, option)
@@ -189,12 +261,23 @@ class AircraftTrackerApp:
 
     def setup_info_display(self):
         """Set up the information display area."""
-        tk.Label(self.control_frame, text="Aircraft Position:").pack(pady=(10, 5))
+        info_frame = tk.LabelFrame(self.control_frame, text="Aircraft Data", padx=5, pady=5)
+        info_frame.pack(pady=5, padx=5, fill="x")
 
-        info_font = tkfont.Font(family="Consolas", size=9)
-        self.info_display = tk.Text(self.control_frame, width=INFO_DISPLAY_SIZE[0], height=INFO_DISPLAY_SIZE[1],
-                                    wrap=tk.NONE, font=info_font)
-        self.info_display.pack(padx=10, pady=10)
+        info_font = tkfont.Font(family="Consolas", size=8)
+        self.info_display = tk.Text(info_frame, width=INFO_DISPLAY_SIZE[0], height=INFO_DISPLAY_SIZE[1],
+                                    wrap=tk.NONE, font=info_font, bg="#f0f0f0")
+        self.info_display.pack(fill="x")
+
+    def setup_stats_display(self):
+        """Set up the flight statistics display area."""
+        stats_frame = tk.LabelFrame(self.control_frame, text="Flight Statistics", padx=5, pady=5)
+        stats_frame.pack(pady=5, padx=5, fill="x")
+
+        stats_font = tkfont.Font(family="Consolas", size=8)
+        self.stats_display = tk.Text(stats_frame, width=STATS_DISPLAY_SIZE[0], height=STATS_DISPLAY_SIZE[1],
+                                     wrap=tk.NONE, font=stats_font, bg="#e8f5e9")
+        self.stats_display.pack(fill="x")
 
     def setup_aircraft_marker(self):
         """Set up the aircraft marker image and related variables."""
@@ -210,12 +293,14 @@ class AircraftTrackerApp:
         """
         data = self.udp_receiver.get_latest_data()
         if data['connected']:
-            self.connection_status.config(text="Connected", fg="green")
+            self.connection_status.config(text="● Connected", fg="green")
             if data['gps'] and data['attitude']:
                 self.update_map_and_marker(data)
                 self.update_info_display(data)
+                self.update_flight_path(data['gps'])
+                self.update_statistics(data['gps'])
         else:
-            self.connection_status.config(text="Disconnected", fg="red")
+            self.connection_status.config(text="● Disconnected", fg="red")
             self.clear_info_display()
 
         self.master.after(UPDATE_INTERVAL, self.update_aircraft_position)
@@ -232,7 +317,7 @@ class AircraftTrackerApp:
 
         if not self.initial_position_set:
             self.map_widget.set_position(gps_data.latitude, gps_data.longitude)
-            self.map_widget.set_zoom(10)
+            self.map_widget.set_zoom(12)
             self.initial_position_set = True
 
         self.rotated_image = self.rotate_image(attitude_data.true_heading)
@@ -246,7 +331,9 @@ class AircraftTrackerApp:
             icon_anchor="center"
         )
 
-        self.map_widget.set_position(gps_data.latitude, gps_data.longitude)
+        # Only auto-center if enabled
+        if self.auto_center_enabled.get():
+            self.map_widget.set_position(gps_data.latitude, gps_data.longitude)
 
     def update_info_display(self, data: Dict[str, Any]):
         """Update the information display with the latest aircraft data."""
@@ -256,15 +343,13 @@ class AircraftTrackerApp:
         alt_ft = gps_data.altitude * 3.28084  # Convert meters to feet
         ground_speed_kts = gps_data.ground_speed * 1.94384  # Convert m/s to knots
 
-        info_text = "=" * 24 + "\n"
-        info_text += f"{'Latitude:':<15}{gps_data.latitude:>8.2f}°\n"
-        info_text += f"{'Longitude:':<15}{gps_data.longitude:>8.2f}°\n"
-        info_text += f"{'Altitude:':<15}{alt_ft:>6.0f} ft\n"
-        info_text += f"{'Ground Speed:':<15}{ground_speed_kts:>5.2f} kts\n"
-        info_text += f"{'True Heading:':<15}{attitude_data.true_heading:>8.2f}°\n"
-        info_text += f"{'Pitch:':<15}{attitude_data.pitch:>8.2f}°\n"
-        info_text += f"{'Roll:':<15}{attitude_data.roll:>8.2f}°\n"
-        info_text += "=" * 24 + "\n"
+        info_text = f"{'Lat:':<10}{gps_data.latitude:>9.4f}°\n"
+        info_text += f"{'Lon:':<10}{gps_data.longitude:>9.4f}°\n"
+        info_text += f"{'Alt:':<10}{alt_ft:>7.0f} ft\n"
+        info_text += f"{'Speed:':<10}{ground_speed_kts:>7.1f} kts\n"
+        info_text += f"{'Heading:':<10}{attitude_data.true_heading:>7.1f}°\n"
+        info_text += f"{'Pitch:':<10}{attitude_data.pitch:>7.1f}°\n"
+        info_text += f"{'Roll:':<10}{attitude_data.roll:>7.1f}°\n"
 
         self.info_display.delete(1.0, tk.END)
         self.info_display.insert(tk.END, info_text)
@@ -272,6 +357,134 @@ class AircraftTrackerApp:
     def rotate_image(self, angle: float) -> ImageTk.PhotoImage:
         """Rotate the aircraft icon image by the given angle."""
         return ImageTk.PhotoImage(self.aircraft_image.rotate(-angle))
+
+    def update_flight_path(self, gps_data: GPSData):
+        """Update the flight path trail on the map."""
+        current_pos = (gps_data.latitude, gps_data.longitude)
+
+        # Add point if it's far enough from the last one (avoid clutter)
+        if not self.flight_path_points or self._calculate_distance(
+            self.flight_path_points[-1], current_pos
+        ) > PATH_MIN_DISTANCE:
+            self.flight_path_points.append(current_pos)
+
+            # Draw the path if we have at least 2 points
+            if len(self.flight_path_points) >= 2:
+                if self.path_line:
+                    self.path_line.delete()
+                self.path_line = self.map_widget.set_path(
+                    self.flight_path_points,
+                    color=PATH_COLOR,
+                    width=3
+                )
+
+    def update_statistics(self, gps_data: GPSData):
+        """Update flight statistics."""
+        current_pos = (gps_data.latitude, gps_data.longitude)
+        alt_ft = gps_data.altitude * 3.28084
+        speed_kts = gps_data.ground_speed * 1.94384
+
+        # Initialize flight start if not set
+        if self.flight_start_time is None and speed_kts > 5:  # Start tracking when moving
+            self.flight_start_time = datetime.now()
+            self.flight_start_position = current_pos
+
+        # Update max values
+        self.max_altitude = max(self.max_altitude, alt_ft)
+        self.max_speed = max(self.max_speed, speed_kts)
+        self.speed_samples.append(speed_kts)
+
+        # Keep only last 100 samples for average calculation
+        if len(self.speed_samples) > 100:
+            self.speed_samples.pop(0)
+
+        # Calculate distance traveled
+        if self.last_position:
+            distance_nm = self._calculate_distance_nm(self.last_position, current_pos)
+            self.total_distance += distance_nm
+
+        self.last_position = current_pos
+
+        # Update display
+        self._update_stats_display()
+
+    def _update_stats_display(self):
+        """Update the statistics display text."""
+        if self.flight_start_time:
+            flight_time = datetime.now() - self.flight_start_time
+            hours = int(flight_time.total_seconds() // 3600)
+            minutes = int((flight_time.total_seconds() % 3600) // 60)
+            seconds = int(flight_time.total_seconds() % 60)
+            time_str = f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        else:
+            time_str = "--:--:--"
+
+        avg_speed = sum(self.speed_samples) / len(self.speed_samples) if self.speed_samples else 0
+
+        stats_text = f"{'Time:':<12}{time_str}\n"
+        stats_text += f"{'Distance:':<12}{self.total_distance:>6.1f} nm\n"
+        stats_text += f"{'Avg Speed:':<12}{avg_speed:>6.1f} kts\n"
+        stats_text += f"{'Max Speed:':<12}{self.max_speed:>6.1f} kts\n"
+        stats_text += f"{'Max Alt:':<12}{self.max_altitude:>6.0f} ft\n"
+
+        if self.flight_start_position:
+            stats_text += f"{'Start:':<12}{self.flight_start_position[0]:>7.3f}°\n"
+            stats_text += f"{'        ':<12}{self.flight_start_position[1]:>7.3f}°\n"
+        else:
+            stats_text += f"{'Start:':<12}  Not set\n"
+
+        stats_text += f"{'Points:':<12}{len(self.flight_path_points):>6}\n"
+
+        self.stats_display.delete(1.0, tk.END)
+        self.stats_display.insert(tk.END, stats_text)
+
+    def _calculate_distance(self, pos1: Tuple[float, float], pos2: Tuple[float, float]) -> float:
+        """Calculate simple Euclidean distance between two points (for filtering)."""
+        return math.sqrt((pos1[0] - pos2[0])**2 + (pos1[1] - pos2[1])**2)
+
+    def _calculate_distance_nm(self, pos1: Tuple[float, float], pos2: Tuple[float, float]) -> float:
+        """Calculate distance in nautical miles using Haversine formula."""
+        lat1, lon1 = math.radians(pos1[0]), math.radians(pos1[1])
+        lat2, lon2 = math.radians(pos2[0]), math.radians(pos2[1])
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+        c = 2 * math.asin(math.sqrt(a))
+
+        # Earth radius in nautical miles
+        r_nm = 3440.065
+
+        return c * r_nm
+
+    def clear_flight_path(self):
+        """Clear the flight path trail from the map."""
+        self.flight_path_points.clear()
+        if self.path_line:
+            self.path_line.delete()
+            self.path_line = None
+        print("Flight path cleared")
+
+    def reset_statistics(self):
+        """Reset all flight statistics to initial values."""
+        self.flight_start_time = None
+        self.flight_start_position = None
+        self.total_distance = 0.0
+        self.max_altitude = 0.0
+        self.max_speed = 0.0
+        self.speed_samples.clear()
+        self.last_position = None
+        self._update_stats_display()
+        print("Statistics reset")
+
+    def recenter_map(self):
+        """Manually re-center the map on the aircraft."""
+        data = self.udp_receiver.get_latest_data()
+        if data['connected'] and data['gps']:
+            gps_data = data['gps']
+            self.map_widget.set_position(gps_data.latitude, gps_data.longitude)
+            print("Map re-centered on aircraft")
 
     def change_map(self):
         """Change the map tile server based on the user's selection."""
