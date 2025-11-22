@@ -17,8 +17,9 @@ and enhance the overall simulation experience. Key features include:
 - Flight path recording with visual trail
 - Flight statistics panel with key metrics
 - Auto-center toggle for map exploration
+- Unit conversion between Imperial and Metric systems
 
-Version 26: Added flight path recording, statistics panel, and auto-center toggle.
+Version 27: Added unit conversion system to switch between Imperial (ft, kts, nm) and Metric (m, km/h, km) units.
 
 """
 
@@ -164,6 +165,9 @@ class AircraftTrackerApp:
         # Auto-center control
         self.auto_center_enabled = tk.BooleanVar(value=True)
 
+        # Unit system control (False = Imperial, True = Metric)
+        self.use_metric_units = tk.BooleanVar(value=False)
+
         self.setup_ui()
         self.udp_receiver = UDPReceiver()
         self.udp_receiver.start_receiving()
@@ -245,6 +249,17 @@ class AircraftTrackerApp:
             font=("Arial", 9)
         )
         reset_stats_btn.pack(fill="x", pady=2)
+
+        # Unit conversion toggle button
+        self.unit_toggle_btn = tk.Button(
+            controls_frame,
+            text="⇄ Switch to Metric",
+            command=self.toggle_units,
+            bg="#9C27B0",
+            fg="white",
+            font=("Arial", 9)
+        )
+        self.unit_toggle_btn.pack(fill="x", pady=2)
 
     def setup_map_selection(self):
         """Set up the map selection listbox."""
@@ -340,13 +355,23 @@ class AircraftTrackerApp:
         gps_data: GPSData = data['gps']
         attitude_data: AttitudeData = data['attitude']
 
-        alt_ft = gps_data.altitude * 3.28084  # Convert meters to feet
-        ground_speed_kts = gps_data.ground_speed * 1.94384  # Convert m/s to knots
+        if self.use_metric_units.get():
+            # Metric units
+            altitude = gps_data.altitude  # meters
+            ground_speed = gps_data.ground_speed * 3.6  # m/s to km/h
+            alt_unit = "m"
+            speed_unit = "km/h"
+        else:
+            # Imperial units
+            altitude = gps_data.altitude * 3.28084  # meters to feet
+            ground_speed = gps_data.ground_speed * 1.94384  # m/s to knots
+            alt_unit = "ft"
+            speed_unit = "kts"
 
         info_text = f"{'Lat:':<10}{gps_data.latitude:>9.4f}°\n"
         info_text += f"{'Lon:':<10}{gps_data.longitude:>9.4f}°\n"
-        info_text += f"{'Alt:':<10}{alt_ft:>7.0f} ft\n"
-        info_text += f"{'Speed:':<10}{ground_speed_kts:>7.1f} kts\n"
+        info_text += f"{'Alt:':<10}{altitude:>7.0f} {alt_unit}\n"
+        info_text += f"{'Speed:':<10}{ground_speed:>7.1f} {speed_unit}\n"
         info_text += f"{'Heading:':<10}{attitude_data.true_heading:>7.1f}°\n"
         info_text += f"{'Pitch:':<10}{attitude_data.pitch:>7.1f}°\n"
         info_text += f"{'Roll:':<10}{attitude_data.roll:>7.1f}°\n"
@@ -421,11 +446,30 @@ class AircraftTrackerApp:
 
         avg_speed = sum(self.speed_samples) / len(self.speed_samples) if self.speed_samples else 0
 
+        if self.use_metric_units.get():
+            # Metric units
+            distance = self.total_distance * 1.852  # nm to km
+            avg_speed_display = avg_speed * 1.852  # knots to km/h
+            max_speed_display = self.max_speed * 1.852  # knots to km/h
+            max_altitude_display = self.max_altitude * 0.3048  # feet to meters
+            dist_unit = "km"
+            speed_unit = "km/h"
+            alt_unit = "m"
+        else:
+            # Imperial units
+            distance = self.total_distance
+            avg_speed_display = avg_speed
+            max_speed_display = self.max_speed
+            max_altitude_display = self.max_altitude
+            dist_unit = "nm"
+            speed_unit = "kts"
+            alt_unit = "ft"
+
         stats_text = f"{'Time:':<12}{time_str}\n"
-        stats_text += f"{'Distance:':<12}{self.total_distance:>6.1f} nm\n"
-        stats_text += f"{'Avg Speed:':<12}{avg_speed:>6.1f} kts\n"
-        stats_text += f"{'Max Speed:':<12}{self.max_speed:>6.1f} kts\n"
-        stats_text += f"{'Max Alt:':<12}{self.max_altitude:>6.0f} ft\n"
+        stats_text += f"{'Distance:':<12}{distance:>6.1f} {dist_unit}\n"
+        stats_text += f"{'Avg Speed:':<12}{avg_speed_display:>6.1f} {speed_unit}\n"
+        stats_text += f"{'Max Speed:':<12}{max_speed_display:>6.1f} {speed_unit}\n"
+        stats_text += f"{'Max Alt:':<12}{max_altitude_display:>6.0f} {alt_unit}\n"
 
         if self.flight_start_position:
             stats_text += f"{'Start:':<12}{self.flight_start_position[0]:>7.3f}°\n"
@@ -477,6 +521,16 @@ class AircraftTrackerApp:
         self.last_position = None
         self._update_stats_display()
         print("Statistics reset")
+
+    def toggle_units(self):
+        """Toggle between imperial and metric units."""
+        self.use_metric_units.set(not self.use_metric_units.get())
+        if self.use_metric_units.get():
+            self.unit_toggle_btn.config(text="⇄ Switch to Imperial")
+            print("Units changed to Metric")
+        else:
+            self.unit_toggle_btn.config(text="⇄ Switch to Metric")
+            print("Units changed to Imperial")
 
     def recenter_map(self):
         """Manually re-center the map on the aircraft."""
