@@ -5,8 +5,6 @@
 
 An open-source real-time aircraft tracker for **Aerofly FS4** flight simulator. Visualize your aircraft position on an interactive map with detailed flight information.
 
-![Aircraft Tracker Demo](https://via.placeholder.com/800x400?text=Aircraft+Tracker+Demo)
-
 ## 🚀 Features
 
 ### Core Features
