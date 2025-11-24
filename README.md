@@ -19,7 +19,13 @@ An open-source real-time aircraft tracker for **Aerofly FS4** flight simulator. 
 - **Connection status indicator** to know when receiving simulator data
 - **Rotating aircraft icon** reflecting actual heading
 
-### New in Version 26 ✨
+### New in Version 27 ✨
+- **Unit Conversion System**: Toggle between Imperial and Metric units with one click
+  - **Imperial**: feet (ft), knots (kts), nautical miles (nm)
+  - **Metric**: meters (m), kilometers/hour (km/h), kilometers (km)
+  - Perfect for glider pilots in Europe and regions preferring metric measurements
+
+### Version 26 Features
 - **Flight Path Recording**: Visual trail showing your complete flight route on the map
 - **Flight Statistics Panel**: Track distance traveled, flight time, average/max speed, max altitude, and more
 - **Auto-Center Toggle**: Disable auto-centering to freely explore the map while tracking continues
@@ -83,6 +89,7 @@ For this tracker to work, you must enable UDP broadcasting in Aerofly FS4:
    - **Statistics**: View real-time flight stats including time, distance, speeds, and altitude
    - **Clear Path**: Click to remove the flight trail and start fresh
    - **Reset Stats**: Click to reset all statistics (useful for starting a new flight session)
+   - **Unit Conversion**: Click "⇄ Switch to Metric" to toggle between Imperial and Metric units
 
 5. **Close the application**:
    - Click the "Close" button
@@ -93,12 +100,12 @@ For this tracker to work, you must enable UDP broadcasting in Aerofly FS4:
 ### Aircraft Data Panel
 The tracker displays the following real-time information:
 
-| Parameter | Unit | Description |
-|-----------|------|-------------|
+| Parameter | Unit (Imperial / Metric) | Description |
+|-----------|--------------------------|-------------|
 | Latitude | Degrees | Current latitude |
 | Longitude | Degrees | Current longitude |
-| Altitude | Feet (ft) | Altitude above sea level |
-| Ground Speed | Knots (kts) | Speed relative to ground |
+| Altitude | Feet (ft) / Meters (m) | Altitude above sea level |
+| Ground Speed | Knots (kts) / Kilometers/hour (km/h) | Speed relative to ground |
 | True Heading | Degrees | True heading |
 | Pitch | Degrees | Pitch angle |
 | Roll | Degrees | Roll angle |
@@ -106,13 +113,13 @@ The tracker displays the following real-time information:
 ### Flight Statistics Panel
 Cumulative flight statistics tracked throughout your session:
 
-| Statistic | Unit | Description |
-|-----------|------|-------------|
+| Statistic | Unit (Imperial / Metric) | Description |
+|-----------|--------------------------|-------------|
 | Time | HH:MM:SS | Total flight time (starts when moving) |
-| Distance | Nautical Miles | Total distance traveled |
-| Avg Speed | Knots | Average speed during flight |
-| Max Speed | Knots | Maximum speed reached |
-| Max Alt | Feet | Maximum altitude reached |
+| Distance | Nautical Miles (nm) / Kilometers (km) | Total distance traveled |
+| Avg Speed | Knots (kts) / Kilometers/hour (km/h) | Average speed during flight |
+| Max Speed | Knots (kts) / Kilometers/hour (km/h) | Maximum speed reached |
+| Max Alt | Feet (ft) / Meters (m) | Maximum altitude reached |
 | Start Position | Lat/Lon | Flight starting coordinates |
 | Points | Count | Number of path points recorded |
 
@@ -172,9 +179,11 @@ RECEIVE_TIMEOUT = 5.0         # Connection timeout (seconds)
 - Verify your internet connection (map tiles are downloaded online)
 - Some maps may have usage limitations, try a different style
 
-## 📝 Version
+## 📝 Version History
 
-**Version 26** (Current): Added flight path recording, flight statistics panel, and auto-center toggle for enhanced flight tracking and analysis.
+**Version 27** (Current): Added unit conversion system to toggle between Imperial (ft, kts, nm) and Metric (m, km/h, km) units. Perfect for international pilots and glider enthusiasts.
+
+**Version 26**: Added flight path recording, flight statistics panel, and auto-center toggle for enhanced flight tracking and analysis.
 
 **Version 25**: Added connection status indicator and improved error handling for UDP data reception.
 
