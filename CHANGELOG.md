@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Version 27] - 2024
+
+### Added
+- **Unit Conversion System**: Toggle between Imperial and Metric measurement systems
+  - Purple toggle button in Map Controls section
+  - Real-time conversion of all displayed units
+  - Button text updates to show current mode
+  - Console feedback when switching units
+- **Imperial Units** (default):
+  - Altitude: feet (ft)
+  - Speed: knots (kts)
+  - Distance: nautical miles (nm)
+- **Metric Units**:
+  - Altitude: meters (m)
+  - Speed: kilometers per hour (km/h)
+  - Distance: kilometers (km)
+
+### Changed
+- Aircraft Data Panel now displays units dynamically based on selected system
+- Flight Statistics Panel now displays units dynamically based on selected system
+- Updated all unit conversions:
+  - Altitude: meters ↔ feet (3.28084 factor)
+  - Speed: m/s → knots (1.94384) or km/h (3.6)
+  - Distance: nautical miles ↔ kilometers (1.852 factor)
+- Updated documentation to reflect dual unit support
+
+### Technical Details
+- Added `use_metric_units` BooleanVar to track unit preference
+- Updated `update_info_display()` method with conditional unit conversion
+- Updated `_update_stats_display()` method with conditional unit conversion
+- Added `toggle_units()` method for seamless unit switching
+- Unit preference persists during session
+
+### Benefits
+- Perfect for glider pilots in Europe preferring metric measurements
+- International usability for pilots worldwide
+- No need to manually convert units during flight
+- Instant visual feedback when switching between systems
+
 ## [Version 26] - 2024
 
 ### Added
